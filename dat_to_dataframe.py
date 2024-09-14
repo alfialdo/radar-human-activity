@@ -68,5 +68,6 @@ if __name__ == '__main__':
     labels = dict(A01='walking', A02='sitting', A03='standing', A04='picking up item', A05='drinking', A06='falling')
     raw_df['label'] = raw_df.activity.map(labels)
 
+    print('Writing dataframe to radar_dataset_cleaned.pickle...')
     raw_df.to_pickle('data/radar_dataset_cleaned.pickle')
         

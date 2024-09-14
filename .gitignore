@@ -1,2 +1,6 @@
-data/
+data/*
+!data/radar_dataset_cleaned.pickle
+!data/label.json
 *.ipynb
+__pycache__/
+*.pth
