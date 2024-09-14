@@ -1,6 +1,4 @@
-from torchvision.datasets import ImageFolder
-from torch.utils.data import DataLoader, Dataset
-from torchvision import transforms
+import torch
 from sklearn.model_selection import train_test_split
 
 import matplotlib.pyplot as plt
@@ -22,7 +20,7 @@ class RadarDataset():
     # This should process our data into an tensor, apply transform function if any
     def __getitem__(self, idx):
         img = Image.open(self.data.loc[idx,'img_path'])
-        label = self.data.loc[idx, 'label']
+        label = torch.tensor(self.data.loc[idx, 'label'])
 
         if self.transform:
             img = self.transform(img)
@@ -43,7 +41,7 @@ class RadarDataset():
                 file_path = os.path.join(path, filename)
 
                 if os.path.isfile(file_path):
-                    df['label'].append(labels[i])
+                    df['label'].append(int(i))
                     df['img_path'].append(file_path)
 
         # Criteria for dataset splitting
@@ -55,9 +53,9 @@ class RadarDataset():
         train_df = []
         test_df = []
 
-        for label in labels.values():
+        for label in labels.keys():
             train, test = train_test_split(
-                df.loc[df.label == label],
+                df.loc[df.label == int(label)],
                 test_size=0.2,
                 random_state = seed
             )
