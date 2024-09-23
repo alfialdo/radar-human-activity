@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def load_sample(samples):
+def load_sample(samples, dataset_path='../dataset'):
 
     data = dict(
         label = [], # .dat file name
@@ -15,10 +15,10 @@ def load_sample(samples):
     
     for s in samples.itertuples():
 
-        dat = f'../dataset/{s.location}/{s.file}.dat'
+        dat = f'{dataset_path}/{s.location}/{s.file}.dat'
 
-        data['label'] = s.label
-        data['file'] = s.file
+        data['label'].append(s.label)
+        data['file'].append(s.file)
 
         with open(dat, 'r') as f:
             lines = f.readlines()
@@ -28,8 +28,8 @@ def load_sample(samples):
     return pd.DataFrame(data)
 
 
-def load_signal(location, file):
-    dat = f'../dataset/{location}/{file}.dat'
+def load_signal(location, file, dataset_path='../dataset'):
+    dat = f'{dataset_path}/{location}/{file}.dat'
 
     with open(dat, 'r') as f:
         lines = f.readlines()    

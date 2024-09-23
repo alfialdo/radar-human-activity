@@ -1,10 +1,14 @@
 import os
 import glob
 import pandas as pd
+from argparse import ArgumentParser
 
 ### LOAD Data Description
-dataset_path = "../dataset"
-dirs = os.listdir(dataset_path)
+ap = ArgumentParser()
+ap.add_argument(
+    '--dataset-path', type=str, default='../dataset',
+    help='Path to Radar .dat dataset'
+)
 
 data = dict(
     file = [],
@@ -17,11 +21,13 @@ data = dict(
 
 
 if __name__ == '__main__':
-    for dir in dirs:
-        if dir in ['dataframe']:
-            continue
+    args = ap.parse_args()
 
-        file_paths = sorted(glob.glob(f'{dataset_path}/{dir}/' + '*.dat'))
+    dirs = os.listdir(args.dataset_path)
+
+    for dir in dirs:
+
+        file_paths = sorted(glob.glob(f'{args.dataset_path}/{dir}/' + '*.dat'))
         print(f'Processing: {dir}...')
         
 
@@ -65,7 +71,7 @@ if __name__ == '__main__':
     raw_df = raw_df.loc[~((raw_df.activity == 'A02') & (raw_df.duration > 5))]
 
     # Add labels
-    labels = dict(A01='walking', A02='sitting', A03='standing', A04='picking up item', A05='drinking', A06='falling')
+    labels = dict(A01='walking', A02='sitting', A03='standing', A04='picking_up_item', A05='drinking', A06='falling')
     raw_df['label'] = raw_df.activity.map(labels)
 
     print('Writing dataframe to radar_dataset_cleaned.pickle...')

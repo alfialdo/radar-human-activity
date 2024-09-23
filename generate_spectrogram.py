@@ -2,13 +2,22 @@ import pandas as pd
 import numpy as np
 import json
 from tqdm import tqdm
+import os
 
 from utils import Plot, RadarPreproc
 from utils.common import load_sample, load_signal
 
 from scipy.signal import stft, filtfilt
 from multiprocessing import Pool
+from argparse import ArgumentParser
 
+ap = ArgumentParser()
+ap.add_argument(
+    '--dataset-path', type=str, default='../dataset',
+    help='Path to Radar .dat dataset'
+)
+
+args = ap.parse_args()
 
 def preprocess_data(sig):
     pulses = RadarPreproc.generate_pulses(sig)
@@ -35,11 +44,16 @@ def preprocess_data(sig):
 
 
 def generate_spectrogram(data, label):
-    for row in tqdm(data.itertuples(), total=len(data), desc=f'Generating spectrogram label {label}', position=int(label)-1):
-        sig = load_signal(row.location, row.file)
+    label_path = f'data/{label}'
+
+    if not os.path.exists(label_path):
+        os.mkdir(label_path)
+
+    for row in tqdm(data.itertuples(), total=len(data), desc=f'Generating spectrogram label {label}', position=int(label)):
+        sig = load_signal(row.location, row.file, dataset_path=args.dataset_path)
 
         # IF walking then divide the data to 5s each
-        if label == '1':
+        if label == '0':
             cut = len(sig)//2
             sigs = [sig[:cut], sig[cut:]]
 
@@ -65,7 +79,7 @@ if __name__ == '__main__':
     with open('data/label.json', 'r') as f:
         labels = json.load(f)
 
-    df = pd.read_pickle('radar_dataset_cleaned.pickle')
+    df = pd.read_pickle('data/radar_dataset_cleaned.pickle')
 
     targets = [df.loc[df.label == x] for x in labels.values()]
 
