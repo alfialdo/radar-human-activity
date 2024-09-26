@@ -9,22 +9,26 @@ class Plot():
     FS = 128000 # sampling frequency in Hz
 
     @classmethod
-    def radar_fmcw_signal(cls, complex_signal):
+    def radar_fmcw_signal(cls, complex_signal, name=False, size=(1000,500)):
         signal = np.asarray(complex_signal)
         amp = np.abs(signal)
         total_time = len(signal) / cls.FS  # Calculate total time duration
         time = np.linspace(0, total_time, len(signal))
 
+        if not name:
+            name = 'Raw Radar FMCW Signal'
+
         # Plotting the signal
         fig = go.Figure(layout=dict(
-            title=dict(text='Raw Radar FMCW Signal'),
+            title=dict(text=name),
             xaxis=dict(title='Time (s)', showgrid=True),
             yaxis=dict(title='Amplitude (V)', showgrid=True),
-            width=700,
-            height=500
+            width=size[0],
+            height=size[1]
         ))
         fig.add_scatter(x=time, y=amp)
-        fig.show()
+
+        return fig
 
 
     @classmethod
@@ -134,20 +138,24 @@ class Plot():
         
     
     @classmethod
-    def spectrogram(cls, v, t, Zxx, img=False, **kwargs):        
+    def spectrogram(cls, v, t, Zxx, size= (6,6), name=False, img=False, **kwargs):        
 
         # Convert magnitude dB
         Zxx = np.abs(Zxx)
         # Zxx = 20 * np.log10(Zxx)
 
+        if not name:
+            name = 'Spectrogram' 
+
+
         # Plot spectrogram figure 
-        plt.figure(figsize=(6, 6))
+        plt.figure(figsize=size)
         plt.pcolormesh(t, v, Zxx, shading='gouraud', cmap='jet')
         
         if img == False:
             plt.ylabel('Velocity [m/s]')
             plt.xlabel('Time [sec]')
-            plt.title('Spectrogram')
+            plt.title(name)
             plt.colorbar(label='Magnitude (dB)')
             plt.show()
 
