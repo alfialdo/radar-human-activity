@@ -1,6 +1,11 @@
+
 from scipy.signal import butter, filtfilt, stft
 import numpy as np
 
+'''
+Author: Muhammad Alfi A
+GitHub:https://github.com/alfialdo
+'''
 class RadarPreproc():
     SAMPLE_PER_SWEEP = 128
     SWEEP = 0.001 # 1ms
