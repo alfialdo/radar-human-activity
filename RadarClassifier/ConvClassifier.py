@@ -24,30 +24,21 @@ class ConvClassifier(nn.Module):
             nn.MaxPool2d(2),
         )
 
-        self.classifier = None
-
-    def __init_classifier(self, x):
-        # Forward pass through features
-        x = self.backbone(x)
-
-        # Get flattened dimension
-        feat_dim = x.shape[1] * x.shape[2] * x.shape[3]
+        self.adaptive_pool = nn.AdaptiveAvgPool2d((1,1))
         
-        # Initialize classifier
         self.classifier = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(feat_dim, 512),
+            nn.Linear(128, 512),
             nn.ReLU(),
             nn.Dropout(0.5),
             nn.Linear(512, self.num_classes)
         )
 
-    def forward(self, x):
-        if self.classifier is None:
-            self.__init_classifier(x)
-            self.classifier.to(x.device)
 
+
+    def forward(self, x):
         x = self.backbone(x)
+        x = self.adaptive_pool(x)
         x = self.classifier(x)
 
         # Output

@@ -119,20 +119,20 @@ if __name__ == '__main__':
     args = ap.parse_args()
     class Config(NamedTuple):
         # Data Loader
-        workers = 8
+        workers = 16
         batch_size = 32
-        img_size = (72,72)
+        img_size = (80,80)
         
         # Training config
-        epochs = 20
+        epochs = 60
         lr = 0.001
         num_classes = 6
         device = torch.device('cuda')
 
         # Model hyperparameters
-        patch_size = 6
+        patch_size = 8
         num_patches = (img_size[0] // patch_size) ** 2
-        projection_dim = 64
+        projection_dim = 32
         num_heads = 4
         transformer_layers = 8
         mlp_head_units = [2048, 1024]
@@ -143,7 +143,7 @@ if __name__ == '__main__':
     config = Config()
 
     if args.model == 'conv-block':
-        model = ConvClassifier(in_channels=3, image_size=(160,160), num_classes=6)
+        model = ConvClassifier(in_channels=3, image_size=config.img_size, num_classes=config.num_classes)
     elif args.model == 'transformer':
         model = ViTClassifierModel(config, num_classes=config.num_classes, device=config.device)
 
