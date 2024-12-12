@@ -49,16 +49,16 @@ def load_signal(location, file, dataset_path='../dataset'):
 
 def load_model(model_path, num_classes=6):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    model = ConvClassifier(channels=3, image_size=(320,320), num_classes=num_classes)
+    model = ConvClassifier(in_channels=3, image_size=(320,320), num_classes=num_classes)
     model.load_state_dict(torch.load(model_path, map_location=device, weights_only=True))
     model.to(device)
     model.eval()
     return model, device
 
 
-def get_test_dataloader(batch_size=16):
+def get_test_dataloader(batch_size=16, size=(320,320)):
     tsfm = transforms.Compose([
-        transforms.Resize(size=(320,320)),
+        transforms.Resize(size=size),
         transforms.ToTensor()
     ])
 
@@ -68,7 +68,7 @@ def get_test_dataloader(batch_size=16):
     )
 
     radar_data_test = RadarDataset(test_df, transform=tsfm)
-    test_loader = DataLoader(radar_data_test, batch_size=batch_size, shuffle=True, num_workers=2)
+    test_loader = DataLoader(radar_data_test, batch_size=batch_size, shuffle=True, num_workers=16)
 
     return test_loader
 

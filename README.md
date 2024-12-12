@@ -102,29 +102,23 @@
     
 
 
-# Prediction Sample
+# Prediction Sample using Convolution Block Classifier
 
 
-    Test Accuracy: 88.32%
-
-
+    Test Accuracy: 91.32%
 
     
 ![png](figure/sample_pred.png)
     
+                      precision    recall  f1-score   support
 
-
-                     precision    recall  f1-score   support
-    
-            walking       0.97      0.94      0.95        62
-            sitting       0.88      0.97      0.92        58
-           standing       0.93      0.91      0.92        58
-    picking_up_item       0.81      0.74      0.77        58
-           drinking       0.75      0.79      0.77        58
+            walking       0.97      0.98      0.98        62
+            sitting       0.91      1.00      0.95        58
+           standing       0.97      0.98      0.97        58
+    picking_up_item       0.95      0.64      0.76        58
+           drinking       0.76      0.91      0.83        58
             falling       1.00      0.97      0.99        40
-    
-           accuracy                           0.88       334
-          macro avg       0.89      0.89      0.89       334
-       weighted avg       0.88      0.88      0.88       334
-    
 
+           accuracy                           0.91       334
+          macro avg       0.92      0.92      0.91       334
+       weighted avg       0.92      0.91      0.91       334

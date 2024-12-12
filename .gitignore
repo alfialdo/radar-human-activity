@@ -4,3 +4,5 @@ data/*
 *.ipynb
 __pycache__/
 *.pth
+*.joblib
+.vscode/
