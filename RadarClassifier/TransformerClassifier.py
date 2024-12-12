@@ -22,7 +22,7 @@ class PulseEmbeddingLayer(nn.Module):
       num_embeddings=num_pulses + 1, embedding_dim=embed_dim
     )
     self.projection_layer = nn.Linear(
-      num_pulses, embed_dim
+      num_features, embed_dim
     )
     self.class_parameter = nn.Parameter(
       torch.rand(batch_size, 1, embed_dim).to(device),
@@ -116,6 +116,7 @@ class TransformerBlock(nn.Module):
     layer_norm_inputs = self.layer_norm_input(inputs)
     attention_output, _ = self.attn(
       query=layer_norm_inputs,
+      key=layer_norm_inputs,
       value=layer_norm_inputs,
     )
     attention_output = self.dropout_1(attention_output)
@@ -131,9 +132,12 @@ class TransformerClassifier(nn.Module):
   def __init__(self, config, num_classes: int, device: torch.device) -> None:
     """Init Function."""
     super().__init__()
+    self.num_groups = config.num_pulses
+
     self.pulse_embedding_layer = PulseEmbeddingLayer(
       config.num_pulses, config.batch_size, config.projection_dim, config.num_features, device
     )
+
     self.transformer_layers = nn.ModuleList()
     for _ in range(config.transformer_layers):
       self.transformer_layers.append(
@@ -154,10 +158,13 @@ class TransformerClassifier(nn.Module):
   def forward(self, x: torch.Tensor) -> torch.Tensor:
     """Forward Pass."""
 
+    batch_size = x.size(0)
+    x = x.view(batch_size, self.num_groups, -1)
     x = self.pulse_embedding_layer(x)
     for transformer_layer in self.transformer_layers:
       x = transformer_layer(x)
     x = x[:, 0]
     x = self.mlp_block(x)
     x = self.logits_layer(x)
+
     return x

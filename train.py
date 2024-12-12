@@ -65,7 +65,7 @@ def get_raw_radar_dataloader(batch_size, workers):
 def cal_accuracy(true_pred, total_pred):
     return (true_pred / total_pred) * 100
 
-def evaluate(test_loader, model, loss_func, device):
+def evaluate(test_loader, model, loss_func, device, model_type=None):
     model.eval()
     true_pred, total_pred = 0, 0
     val_loss = 0.0
@@ -73,9 +73,16 @@ def evaluate(test_loader, model, loss_func, device):
 
     with torch.no_grad():
         for data in tqdm(test_loader, desc=f"Model validation"):
-            image, label = data['image'].to(device), data['label'].to(device)
+            if model_type is None:
+                feat, label = data['image'].to(device), data['label'].to(device)
+            elif model_type == 'transformer':
+                feat, label = data['signal'].to(device), data['label'].to(device)
 
-            outputs = model(image)
+                if feat.size(0) < 32:
+                    continue
+
+
+            outputs = model(feat)
             loss = loss_func(outputs, label)
 
             val_loss += loss.item()
@@ -100,6 +107,8 @@ def train_raw_data(model, train_loader, test_loader, optimizer, loss_func, epoch
         for data in tqdm(train_loader, desc=f'Training epoch {epoch+1}/{epochs}'):
             signal, label = data['signal'].to(device), data['label'].to(device)
 
+            if signal.size(0) < 32:
+                continue
             optimizer.zero_grad()
             outputs = model(signal)
 
@@ -111,7 +120,7 @@ def train_raw_data(model, train_loader, test_loader, optimizer, loss_func, epoch
             train_loss += loss.item()
 
         # Validate trained model
-        val_loss, true_pred, total_pred = evaluate(test_loader, model, loss_func, device)
+        val_loss, true_pred, total_pred = evaluate(test_loader, model, loss_func, device, model_type='transformer')
         metrics['train_loss'].append(train_loss/len(train_loader))
         metrics['val_loss'].append(val_loss)
         val_acc = cal_accuracy(true_pred, total_pred)
@@ -163,11 +172,11 @@ if __name__ == '__main__':
     class Config(NamedTuple):
         # Data Loader
         workers = 16
-        batch_size = 4
+        batch_size = 32
         img_size = (80,80)
         
         # Training config
-        epochs = 2
+        epochs = 20
         lr = 0.001
         num_classes = 6
         device = torch.device('cuda')
@@ -183,8 +192,8 @@ if __name__ == '__main__':
         seed = 11
 
         # For transformer model
-        num_pulses = 5000
-        num_features = 128
+        num_pulses = 25
+        num_features = 25600
 
     config = Config()
 
@@ -210,7 +219,6 @@ if __name__ == '__main__':
             device=config.device,
             model_path=args.best_model_path,
         )
-
 
     else:
         train_loader, test_loader = get_radar_dataloader(batch_size=config.batch_size, img_size=config.img_size, workers=config.workers)
